@@ -8,6 +8,8 @@ import { convertSketch } from './sketchConverter';
 import Workplane from './components/Workplane';
 import PartsPanel from './components/PartsPanel';
 import SettingsCard from './components/SettingsCard';
+import Homepage from './components/Homepage';
+
 
 export default function App() {
   const [parts, setParts] = useState<Part[]>([]);
@@ -17,6 +19,7 @@ export default function App() {
   const [isSimulating, setIsSimulating] = useState(false);
   const [message, setMessage] = useState('');
   const [loadingSketch, setLoadingSketch] = useState(false);
+  const [view, setView] = useState('home');
 
   const jsonInput = useRef<HTMLInputElement>(null);
   const photoInput = useRef<HTMLInputElement>(null);
@@ -269,7 +272,35 @@ export default function App() {
 
   return (
     <div className="app">
-      <header className="toolbar">
+      <input
+          ref={photoInput}
+          type="file"
+          accept="image/*"
+          hidden
+          onChange={(e) => {
+            if (e.target.files?.[0]) uploadSketch(e.target.files[0]);
+            e.target.value = '';
+          }}
+        />
+        <input
+          ref={jsonInput}
+          type="file"
+          accept=".json"
+          hidden
+          onChange={(e) => {
+            if (e.target.files?.[0]) importCircuit(e.target.files[0]);
+            e.target.value = '';
+          }}
+        />
+      {view === 'home' ? (
+        <Homepage
+          onStart={() => setView('editor')}
+          onUploadSketch={() => { setView('editor'); photoInput.current?.click(); }}
+          onTryExample={() => setView('editor')}
+        />
+      ) : (
+        <>
+          <header className="toolbar">
         <div className="logo">Circuit Sandbox</div>
 
         <div className="button-group">
@@ -295,26 +326,7 @@ export default function App() {
             Export
           </button>
         </div>
-        <input
-          ref={photoInput}
-          type="file"
-          accept="image/*"
-          hidden
-          onChange={(e) => {
-            if (e.target.files?.[0]) uploadSketch(e.target.files[0]);
-            e.target.value = '';
-          }}
-        />
-        <input
-          ref={jsonInput}
-          type="file"
-          accept=".json"
-          hidden
-          onChange={(e) => {
-            if (e.target.files?.[0]) importCircuit(e.target.files[0]);
-            e.target.value = '';
-          }}
-        />
+        
 
         <button className={isSimulating ? 'btn sim-button running' : 'btn sim-button'} onClick={() => setIsSimulating(!isSimulating)}>
           {isSimulating ? '■ Stop Simulation' : '▶ Start Simulation'}
@@ -371,6 +383,11 @@ export default function App() {
 
         <PartsPanel onClickPart={(type) => addPart(type, 250 + parts.length * 30, 250 + parts.length * 20)} />
       </main>
+        </>
+      )}
+
+      
+      
     </div>
   );
 }
