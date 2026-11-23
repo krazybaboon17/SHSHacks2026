@@ -1,21 +1,15 @@
-async function resizeImageIfNeeded(file: File, maxDim = 1600): Promise<Blob> {
+async function resizeImageIfNeeded(file: File): Promise<Blob> {
+  if (file.size < 3.5 * 1024 * 1024) return file;
   return new Promise((resolve) => {
     const img = new Image();
-    const url = URL.createObjectURL(file);
     img.onload = () => {
-      URL.revokeObjectURL(url);
       let { width, height } = img;
-      if (width <= maxDim && height <= maxDim && file.size < 3.5 * 1024 * 1024) {
-        resolve(file);
-        return;
-      }
-      if (width > height) {
-        if (width > maxDim) {
+      const maxDim = 1600;
+      if (width > maxDim || height > maxDim) {
+        if (width > height) {
           height = Math.round((height * maxDim) / width);
           width = maxDim;
-        }
-      } else {
-        if (height > maxDim) {
+        } else {
           width = Math.round((width * maxDim) / height);
           height = maxDim;
         }
@@ -24,21 +18,12 @@ async function resizeImageIfNeeded(file: File, maxDim = 1600): Promise<Blob> {
       canvas.width = width;
       canvas.height = height;
       const ctx = canvas.getContext('2d');
-      if (!ctx) {
-        resolve(file);
-        return;
-      }
+      if (!ctx) return resolve(file);
       ctx.drawImage(img, 0, 0, width, height);
-      canvas.toBlob(
-        (blob) => {
-          resolve(blob || file);
-        },
-        'image/jpeg',
-        0.85,
-      );
+      canvas.toBlob((blob) => resolve(blob || file), 'image/jpeg', 0.85);
     };
     img.onerror = () => resolve(file);
-    img.src = url;
+    img.src = URL.createObjectURL(file);
   });
 }
 

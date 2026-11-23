@@ -194,7 +194,7 @@ export default function App() {
   }
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
-      const typingInBox = ['INPUT', 'SELECT'].includes((e.target as HTMLElement).tagName);
+      const typingInBox = ['INPUT', 'SELECT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName);
       if (typingInBox) return;
       if (e.key === 'Delete' || e.key === 'Backspace') deleteSelected();
       if (e.key === 'r' || e.key === 'R') rotateSelected();
