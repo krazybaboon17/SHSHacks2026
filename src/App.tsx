@@ -8,6 +8,8 @@ import { convertSketch } from './sketchConverter';
 import Workplane from './components/Workplane';
 import PartsPanel from './components/PartsPanel';
 import SettingsCard from './components/SettingsCard';
+import Homepage from './components/Homepage';
+import exampleCircuit from '../examples/led-circuit.json';
 
 export default function App() {
   const [parts, setParts] = useState<Part[]>([]);
@@ -17,6 +19,7 @@ export default function App() {
   const [isSimulating, setIsSimulating] = useState(false);
   const [message, setMessage] = useState('');
   const [loadingSketch, setLoadingSketch] = useState(false);
+  const [view, setView] = useState<'home' | 'editor'>('home');
 
   const jsonInput = useRef<HTMLInputElement>(null);
   const photoInput = useRef<HTMLInputElement>(null);
@@ -127,13 +130,14 @@ export default function App() {
 
   const selectedPart = parts.find((p) => p.id === selectedPartId);
   const selectedWire = wires.find((w) => w.id === selectedWireId);
+
   function addPart(type: PartType, x: number, y: number) {
     const info = PART_INFO[type];
     const newPart: Part = {
       id: makeId(type),
       type,
       x: snapToGrid(x - info.width / 2), 
-      y: snapToGrid(y - info.height / 2),
+      y: snapToGrid(y - info.height / 2), 
       rotation: 0,
       ...defaultSettings(type),
     };
@@ -150,19 +154,29 @@ export default function App() {
   }
 
   function addWire(fromPart: string, fromPin: string, toPart: string, toPin: string) {
+    const alreadyConnected = wires.some(
+      (w) =>
+        (w.fromPart === fromPart && w.fromPin === fromPin && w.toPart === toPart && w.toPin === toPin) ||
+        (w.fromPart === toPart && w.fromPin === toPin && w.toPart === fromPart && w.toPin === fromPin),
+    );
+    if (alreadyConnected) return;
+
+    const nextColor = WIRE_COLORS[wires.length % WIRE_COLORS.length];
     const newWire: Wire = {
       id: makeId('wire'),
       fromPart,
       fromPin,
       toPart,
       toPin,
-      color: WIRE_COLORS[wires.length % WIRE_COLORS.length],
+      color: nextColor,
     };
     setWires([...wires, newWire]);
+    selectWire(newWire.id);
   }
 
   function rotateSelected() {
-    if (selectedPart) changePart(selectedPart.id, { rotation: (selectedPart.rotation + 90) % 360 });
+    if (!selectedPartId) return;
+    setParts(parts.map((p) => (p.id === selectedPartId ? { ...p, rotation: (p.rotation + 90) % 360 } : p)));
   }
 
   function deleteSelected() {
@@ -192,7 +206,9 @@ export default function App() {
     setWires([]);
     selectPart(null);
   }
+
   useEffect(() => {
+    if (view !== 'editor') return;
     function handleKey(e: KeyboardEvent) {
       const typingInBox = ['INPUT', 'SELECT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName);
       if (typingInBox) return;
@@ -267,110 +283,166 @@ export default function App() {
     setLoadingSketch(false);
   }
 
+  const handleStart = () => {
+    if (parts.length > 0) {
+      if (window.confirm('Start a new blank project? Current circuit will be cleared.')) {
+        setParts([]);
+        setWires([]);
+        selectPart(null);
+      }
+    }
+    setView('editor');
+  };
+
+  const handleUploadSketchFromHome = () => {
+    setView('editor');
+    setTimeout(() => {
+      photoInput.current?.click();
+    }, 50);
+  };
+
+  const handleTryExample = () => {
+    loadCircuit(exampleCircuit as { parts?: Part[]; wires?: Wire[] });
+    setView('editor');
+    showMessage('Loaded example circuit! Click "Start Simulation" to see it run.');
+  };
+
+  const handleGoHome = () => {
+    setIsSimulating(false);
+    setView('home');
+  };
+
   return (
     <div className="app">
-      <header className="toolbar">
-        <div className="logo">Circuit Sandbox</div>
+      <input
+        ref={photoInput}
+        type="file"
+        accept="image/*"
+        hidden
+        onChange={(e) => {
+          if (e.target.files?.[0]) uploadSketch(e.target.files[0]);
+          e.target.value = '';
+        }}
+      />
+      <input
+        ref={jsonInput}
+        type="file"
+        accept=".json"
+        hidden
+        onChange={(e) => {
+          if (e.target.files?.[0]) importCircuit(e.target.files[0]);
+          e.target.value = '';
+        }}
+      />
 
-        <div className="button-group">
-          <button className="btn" onClick={rotateSelected} disabled={!selectedPart}>
-            Rotate
-          </button>
-          <button className="btn" onClick={deleteSelected} disabled={!selectedPart && !selectedWire}>
-            Delete
-          </button>
-          <button className="btn" onClick={clearAll}>
-            Clear
-          </button>
-        </div>
-
-        <div className="button-group">
-          <button className="btn" onClick={() => photoInput.current?.click()} disabled={loadingSketch}>
-            {loadingSketch ? 'Reading sketch...' : 'Upload Sketch'}
-          </button>
-          <button className="btn" onClick={() => jsonInput.current?.click()}>
-            Import
-          </button>
-          <button className="btn" onClick={exportCircuit}>
-            Export
-          </button>
-        </div>
-        <input
-          ref={photoInput}
-          type="file"
-          accept="image/*"
-          hidden
-          onChange={(e) => {
-            if (e.target.files?.[0]) uploadSketch(e.target.files[0]);
-            e.target.value = '';
-          }}
+      {view === 'home' ? (
+        <Homepage
+          onStart={handleStart}
+          onUploadSketch={handleUploadSketchFromHome}
+          onTryExample={handleTryExample}
         />
-        <input
-          ref={jsonInput}
-          type="file"
-          accept=".json"
-          hidden
-          onChange={(e) => {
-            if (e.target.files?.[0]) importCircuit(e.target.files[0]);
-            e.target.value = '';
-          }}
-        />
-
-        <button className={isSimulating ? 'btn sim-button running' : 'btn sim-button'} onClick={() => setIsSimulating(!isSimulating)}>
-          {isSimulating ? '■ Stop Simulation' : '▶ Start Simulation'}
-        </button>
-      </header>
-      <main className="main">
-        <div className="workplane-area">
-          <Workplane
-            parts={parts}
-            wires={wires}
-            selectedPartId={selectedPartId}
-            selectedWireId={selectedWireId}
-            readings={simulation?.readings ?? null}
-            onSelectPart={selectPart}
-            onSelectWire={selectWire}
-            onAddPart={addPart}
-            onMovePart={movePart}
-            onAddWire={addWire}
-            onFlipSwitch={(id) => changePart(id, { isOn: !parts.find((p) => p.id === id)?.isOn })}
-          />
-
-          <SettingsCard
-            part={selectedPart}
-            wire={selectedWire}
-            reading={selectedPart ? simulation?.readings[selectedPart.id] : undefined}
-            onChangePart={(changes) => selectedPart && changePart(selectedPart.id, changes)}
-            onChangeWireColor={(color) =>
-              setWires(wires.map((w) => (w.id === selectedWireId ? { ...w, color } : w)))
-            }
-            onRotate={rotateSelected}
-            onDelete={deleteSelected}
-          />
-
-          {isSimulating && (
-            <div className="sim-status">
-              {simulation && simulation.warnings.length > 0 ? (
-                simulation.warnings.map((warning, i) => (
-                  <div key={i} className="warning">
-                    ⚠ {warning}
-                  </div>
-                ))
-              ) : (
-                <div className="all-good">Simulation running</div>
-              )}
+      ) : (
+        <>
+          <header className="toolbar">
+            <div className="logo" onClick={handleGoHome} title="Return to Homepage">
+              <img
+                src="/logo.png"
+                alt="CircuitTree logo"
+                style={{ width: 24, height: 24, objectFit: 'contain' }}
+              />
+              CircuitTree
             </div>
-          )}
 
-          {message && <div className="message">{message}</div>}
+            <div className="button-group">
+              <button className="btn" onClick={handleGoHome} title="Return to Homepage">
+                Home
+              </button>
+            </div>
 
-          <div className="help-text">
-            Click a pin, then another pin to make a wire · Drag the background to move around · Scroll to zoom
-          </div>
-        </div>
+            <div className="button-group">
+              <button className="btn" onClick={rotateSelected} disabled={!selectedPart}>
+                Rotate
+              </button>
+              <button className="btn" onClick={deleteSelected} disabled={!selectedPart && !selectedWire}>
+                Delete
+              </button>
+              <button className="btn" onClick={clearAll}>
+                Clear
+              </button>
+            </div>
 
-        <PartsPanel onClickPart={(type) => addPart(type, 250 + parts.length * 30, 250 + parts.length * 20)} />
-      </main>
+            <div className="button-group">
+              <button className="btn" onClick={() => photoInput.current?.click()} disabled={loadingSketch}>
+                {loadingSketch ? 'Reading sketch...' : 'Upload Sketch'}
+              </button>
+              <button className="btn" onClick={() => jsonInput.current?.click()}>
+                Import
+              </button>
+              <button className="btn" onClick={exportCircuit}>
+                Export
+              </button>
+            </div>
+
+            <button
+              className={isSimulating ? 'btn sim-button running' : 'btn sim-button'}
+              onClick={() => setIsSimulating(!isSimulating)}
+            >
+              {isSimulating ? '■ Stop Simulation' : '▶ Start Simulation'}
+            </button>
+          </header>
+          <main className="main">
+            <div className="workplane-area">
+              <Workplane
+                parts={parts}
+                wires={wires}
+                selectedPartId={selectedPartId}
+                selectedWireId={selectedWireId}
+                readings={simulation?.readings ?? null}
+                onSelectPart={selectPart}
+                onSelectWire={selectWire}
+                onAddPart={addPart}
+                onMovePart={movePart}
+                onAddWire={addWire}
+                onFlipSwitch={(id) => changePart(id, { isOn: !parts.find((p) => p.id === id)?.isOn })}
+              />
+
+              <SettingsCard
+                part={selectedPart}
+                wire={selectedWire}
+                reading={selectedPart ? simulation?.readings[selectedPart.id] : undefined}
+                onChangePart={(changes) => selectedPart && changePart(selectedPart.id, changes)}
+                onChangeWireColor={(color) =>
+                  setWires(wires.map((w) => (w.id === selectedWireId ? { ...w, color } : w)))
+                }
+                onRotate={rotateSelected}
+                onDelete={deleteSelected}
+              />
+
+              {isSimulating && (
+                <div className="sim-status">
+                  {simulation && simulation.warnings.length > 0 ? (
+                    simulation.warnings.map((warning, i) => (
+                      <div key={i} className="warning">
+                        ⚠ {warning}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="all-good">Simulation running</div>
+                  )}
+                </div>
+              )}
+
+              {message && <div className="message">{message}</div>}
+
+              <div className="help-text">
+                Click a pin, then another pin to make a wire · Drag the background to move around · Scroll to zoom
+              </div>
+            </div>
+
+            <PartsPanel onClickPart={(type) => addPart(type, 250 + parts.length * 30, 250 + parts.length * 20)} />
+          </main>
+        </>
+      )}
     </div>
   );
 }
