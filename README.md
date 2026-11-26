@@ -25,7 +25,7 @@ Open https://circuitree.vercel.app/. That's all! No setup required.
 ## Files
 
 
-index.py        Uses the Gemini API to return a paper drawn circuit to a JSON string as nodes and edges
+index.py --> Uses the Gemini API to return a paper drawn circuit to a JSON string as nodes and edges
 
 DO THE REST IN THE FORMAT OF INDEX.PY
 | `src/App.tsx` | Holds the circuit (parts + wires) and all the buttons |
