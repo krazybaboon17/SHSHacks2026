@@ -1,44 +1,14 @@
-# ⚡ Circuit Sandbox
+# CircuiTree
 
-Draw a circuit on paper, snap a photo, and watch it come to life. Or build one yourself
-by dragging parts onto the workplane, Tinkercad-style.
+Model your own circuits on the diagram, or draw them on paper and upload a photo to see your circuit come to life on the site!
 
 - **Frontend:** React + TypeScript + Vite (`src/`)
 - **Backend:** Python + FastAPI + Gemini (`api/index.py`)
 - **Hosting:** Vercel (`vercel.json`)
 
-## Running it on your computer
+## Running the Program
 
-You need [Node.js](https://nodejs.org) and Python 3. Use two terminals.
-
-**1. Backend** (from the project folder)
-
-```bash
-pip install -r requirements.txt
-uvicorn api.index:app --reload --port 8000
-```
-
-It needs a Gemini API key. Put it in `api/.env` (this file is gitignored, never commit it):
-
-```
-GEMINI_API_KEY=your-key-here
-```
-
-**2. Frontend**
-
-```bash
-npm install
-npm run dev
-```
-
-Open the link it prints (usually http://localhost:5173). Vite forwards anything under
-`/api` to the backend on port 8000, so **Upload Sketch** works locally.
-
-## Putting it on Vercel
-
-1. Push the repo to GitHub and import it in Vercel. It detects Vite automatically.
-2. In the Vercel project settings, add the environment variable `GEMINI_API_KEY`.
-3. Deploy. `vercel.json` sends `/api/...` to the Python backend and everything else to the app.
+Open https://circuitree.vercel.app/. That's all! No setup required.
 
 ## How to use it
 
@@ -50,12 +20,14 @@ Open the link it prints (usually http://localhost:5173). Vite forwards anything 
 - **Run it:** press **Start Simulation**, then click a switch's slider to flip it
 - **From a drawing:** press **Upload Sketch** and pick a photo of a hand-drawn circuit
 - **Save / load:** Export and Import (try loading `examples/led-circuit.json`)
+- **Arduino:** Plug in all your wires and components and then write code for your Arduino! Add ports to the Arduino as you go!
 
 ## Files
 
-| File | What it does |
-| --- | --- |
-| `api/index.py` | Backend: sends the photo to Gemini and returns `{ nodes, edges }` |
+File            What it Does
+index.py        Uses the Gemini API to return a paper drawn circuit to a JSON string as nodes and edges
+
+DO THE REST IN THE FORMAT OF INDEX.PY
 | `src/App.tsx` | Holds the circuit (parts + wires) and all the buttons |
 | `src/parts.ts` | Info about every part: size, pins, LED colors |
 | `src/simulator.ts` | The physics! Figures out current and voltage for every part |
@@ -69,15 +41,17 @@ Open the link it prints (usually http://localhost:5173). Vite forwards anything 
 
 ## How a photo becomes a circuit
 
-1. `visionApi.ts` uploads the photo to `POST /api/processImage`.
+1. visionApi.ts accesses the POST method in index.py
 2. Gemini returns nodes (parts) and edges (wires).
-3. `sketchConverter.ts` cleans that up, because the AI doesn't always use the same names:
+
+3. I HAVE NOT CHANGED #4. BOWEN U GOT THAT
+4. `sketchConverter.ts` cleans that up, because the AI doesn't always use the same names:
    - Part types: "battery", "VCC", "9V source" all become a battery; "diode"/"LED" become an LED, etc.
    - Pins: "+", "positive", "anode", "pin1" are all understood.
    - Values: "9V", "330Ω", "4.7k" are read as numbers.
    - Ground symbols get connected to the battery's minus side.
    - Anything we don't support yet (like capacitors) is skipped, and the app tells you.
-4. The parts show up on the workplane where you can fix anything the AI got wrong.
+5. The parts show up on the workplane where you can fix anything the AI got wrong.
 
 ## How the simulator works
 
