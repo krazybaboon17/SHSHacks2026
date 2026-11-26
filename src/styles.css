@@ -56,15 +56,6 @@ body,
 .logo {
   font-weight: bold;
   font-size: 17px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  user-select: none;
-}
-
-.logo:hover {
-  opacity: 0.8;
 }
 
 .button-group {
@@ -336,165 +327,69 @@ body,
   pointer-events: none;
 }
 
-/* Homepage styles */
 .homepage {
   background-color: #ffffff;
   background-image:
     linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
   background-size: 40px 40px;
-  color: #111827;
-  overflow-y: auto;
-  height: 100%;
-  padding: 48px 24px 64px;
-  box-sizing: border-box;
-}
-
-.homepage-hero {
-  max-width: 720px;
-  margin: 0 auto;
+  color: #000000;
+  min-height: 175vh;
   text-align: center;
-}
+  padding: 64px 36px 120px;
 
-.homepage-logo {
-  width: 180px;
-  height: 180px;
-  object-fit: contain;
-  margin-bottom: 8px;
 }
 
 .homepage h1 {
-  color: #111827;
-  font-size: 44px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  margin: 0 0 16px;
+  color: #000000;
+  font-size: 48px;
 }
 
-.homepage-subtitle {
-  color: #4b5563;
-  font-size: 18px;
-  line-height: 1.5;
-  margin: 0 0 32px;
+.homepage p {
+  color: #000000;
 }
 
 .homepage-buttons {
   display: flex;
   gap: 12px;
   justify-content: center;
-  flex-wrap: wrap;
 }
 
 .homepage-buttons button {
   padding: 12px 24px;
-  font-size: 15px;
-  font-weight: 600;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.15s ease;
 }
 
-.homepage-buttons .btn-primary {
-  background: #111827;
+.homepage-buttons button:first-child {
+  background: #000000;
   color: #ffffff;
-  border: 1px solid #111827;
+  border: 1px solid #000000;
 }
 
-.homepage-buttons .btn-primary:hover {
-  background: #1f2937;
-  transform: translateY(-1px);
-}
-
-.homepage-buttons .btn-secondary {
+.homepage-buttons button:not(:first-child) {
   background: #ffffff;
-  color: #111827;
-  border: 1px solid #d1d5db;
-}
-
-.homepage-buttons .btn-secondary:hover {
-  background: #f9fafb;
-  border-color: #9ca3af;
-  transform: translateY(-1px);
-}
-
-.how-it-works,
-.features {
-  max-width: 960px;
-  margin: 64px auto 0;
-  text-align: center;
-}
-
-.how-it-works h2,
-.features h2 {
-  font-size: 28px;
-  font-weight: 700;
-  color: #111827;
-  margin-bottom: 28px;
-}
-
-.how-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 20px;
-  text-align: left;
-}
-
-.how-card {
-  background: #ffffff;
+  color: #000000;
   border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.how-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
+.homepage-logo {
+  width: 240px;
 }
 
-.how-number {
-  font-size: 13px;
-  font-weight: 700;
-  color: #2563eb;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-  letter-spacing: 0.05em;
-}
-
-.how-card h3 {
-  margin: 0 0 10px;
-  font-size: 18px;
-  font-weight: 600;
-  color: #1f2937;
-}
-
-.how-card p {
-  margin: 0;
-  color: #4b5563;
-  line-height: 1.5;
-  font-size: 14px;
-}
-
-.homepage-footer {
-  max-width: 960px;
-  margin: 72px auto 0;
-  padding: 32px 16px 0;
-  border-top: 1px solid #e5e7eb;
+.features {
+  padding: 64px 24px;
   text-align: center;
 }
 
-.footer-title {
-  color: #374151;
-  font-weight: 600;
-  font-size: 14px;
-  margin: 0 0 6px;
+.features h2 {
+  font-size: 32px;
+  margin-bottom: 32px;
+}
+.homepage-footer {
+  padding: 32px 24px;
+  text-align: center;
+  border-top: 1px solid #e5e7eb;
+  color: #6b7280;
 }
 
-.footer-credits {
-  color: #6b7280;
-  font-size: 13px;
-  margin: 0;
-}
