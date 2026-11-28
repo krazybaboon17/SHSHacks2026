@@ -8,7 +8,7 @@ Model your own circuits on the diagram, or draw them on paper and upload a photo
 
 ## Running the Program
 
-Open https://circuitree.vercel.app/. That's all! No setup required.
+Open https://circuitree.vercel.app/. That's all! No setup required. Do not use the vercel deployment link that is shown on the github page. Use circuitree.vercel.app
 
 ## How to use it
 
