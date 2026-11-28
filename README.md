@@ -28,20 +28,20 @@ Open https://circuitree.vercel.app/. That's all! No setup required.
 \
 \
 api/index.py →  Uses the Gemini API to return a paper drawn circuit to a JSON string as nodes and edges \
-src/App.tsx →  Manages the editing functionalities and holds the circuit \
-src/helpers.ts → Manages the alignment and coordination of each of the circuit components \
-src/main.tsx → Connects React code to the website \
-src/parts.ts → Defines the necessary information for each of the circuit components \
+src/App.tsx →  Manages the editing functionalities and mantains the circuit states \
+src/helpers.ts → Manages the alignment and positioning of the circuit components \
+src/main.tsx → Connects the React code to the actual website \
+src/parts.ts → Defines the properties for each of the circuit components \
 src/simulator.ts → Uses physics, mainly Kirchoff’s Current laws, to simulate how the circuit would behave \
-src/sketchConverter.ts → Categorizes the AI visual detection into universal and fixed component names \
-src/styles.css → Defines the style of the website \
-src/visionApi.ts → Sends photos uploaded by the user to the backend \
+src/sketchConverter.ts → Categorizes the AI visual detection into standardized component names \
+src/styles.css → Defines the visual styling of the website \
+src/visionApi.ts → Sends user-uploaded images to the backend \
 src/components/Homepage.tsx → Creates the homepage of the website \
-src/components/PartDrawing.tsx → Defines how each component should look like in a circuit and accounts for the simulated values given during a circuit simulation \
-src/components.PartsPanel.tsx → Creates the sidebar using parts.ts so that components can be dragged and dropped to from the sidebar to create a circuit \
-src/components/SettingsCard.tsx → Creates and displays the settings of a component that you click in a circuit \
-src/components/Workplane.tsx → Renders the grid and components and handles mouse interactions such as zooming in/out or dropping and dragging components \
-Index.html → The html page in which main.tsx loads the website for CircuitTree
+src/components/PartDrawing.tsx → Renders each of the components using simulated values during simulation \
+src/components.PartsPanel.tsx → Uses parts.ts to create a sidebar for dragging and dropping components into the circut \
+src/components/SettingsCard.tsx → Displays the settings of the component that the user clicks on \
+src/components/Workplane.tsx → Renders the workspace and mouse interactions such as zooming in and out \
+Index.html → The HTML page in which main.tsx loads CircuitTree
  
 
 ## How a photo becomes a circuit
